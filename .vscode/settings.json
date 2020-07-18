@@ -1,0 +1,33 @@
+{
+  // Syntax check args.
+  "ecl.syntaxArgs": ["-syntax"],
+
+  // Run 'eclcc -syntax' on save.
+  "ecl.syntaxCheckOnSave": true, 
+
+  // Run 'eclcc -syntax' on load.
+  "ecl.syntaxCheckOnLoad": true,
+
+// External folders used by IMPORT
+  "ecl.includeFolders": [],
+
+  // Override eclcc auto detection
+  "ecl.eclccPath": "",
+
+  // Add '-legacy' arguement to eclcc.
+  "ecl.legacyMode": false,
+
+  // Open workunits in external browser.
+  "ecl.WUOpenExternal": true,
+
+  // Automatically open WU in browser on creation.
+  "ecl.WUAutoOpen": false,
+
+  // Debug logging.
+  "ecl.debugLogging": false,
+  "http.proxyStrictSSL": false,
+  "http.proxySupport": "on",
+  "github.allowUnsafeSSL": true,
+
+
+}

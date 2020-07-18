@@ -1,0 +1,3 @@
+IMPORT STD;
+OUTPUT('TEST');
+
