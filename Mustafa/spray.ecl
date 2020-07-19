@@ -10,5 +10,4 @@ STD.File.SprayDelimited('192.168.56.101',
        'IN::test'
        );
 
-dsread := DATASET('kavin::filenams', RecordStructure, CSV(HEADER(1)));
-PROJECT(dsread, TRANSFORM(NewRec), SELF.new := FINDREPLACE, SELF := LEFT));
+
