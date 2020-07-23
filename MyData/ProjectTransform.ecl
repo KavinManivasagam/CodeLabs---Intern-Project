@@ -1,10 +1,10 @@
 IMPORT STD;
 
 
-Layout_first := RECORD
+Layout_ProjectTransform := RECORD
     STRING15 Date;
     STRING15 Region;
-    UDECIMAL6 TGA; //ACTUAL THERMAL GENERATION
+    STRING15 TGA; //ACTUAL THERMAL GENERATION
     UDECIMAL6 TGE;
     UDECIMAL4 NGA; //ACTUAL NUCLEAR GENERATION
     UDECIMAL4 NGE;
@@ -15,14 +15,14 @@ END;
 
 
 //OUTPUT(first);
-EXPORT first := DATASET('~kavin::test::file::file.csv',Layout_first,THOR);
+EXPORT ProjectTransform := DATASET('~kavin::test::file::file.csv',Layout_ProjectTransform,THOR);
 
 
 
 NewLayout:= RECORD
     UNSIGNED4 Date;
     STRING15 Region;
-    UDECIMAL6 TGA; //ACTUAL THERMAL GENERATION
+    STRING15 TGA; //ACTUAL THERMAL GENERATION
     UDECIMAL6 TGE;
     UDECIMAL4 NGA; //ACTUAL NUCLEAR GENERATION
     UDECIMAL4 NGE;
@@ -31,11 +31,12 @@ NewLayout:= RECORD
 END;
 
 
-EXPORT ID_first := PROJECT(first,
+EXPORT ID_ProjectTransform := PROJECT(ProjectTransform,
                         TRANSFORM(
                             NewLayout,
-                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y-%m-%d', '%Y%m%d');
+                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y%m%d');
                             SELF := LEFT;
+                            SELF.TGA := STD.Str.Splitwords(LEFT.TGA, ',')[2..];
                         ));
 
-ID_first;
+ID_ProjectTransform;
