@@ -31,12 +31,12 @@ NewLayout:= RECORD
 END;
 
 
-EXPORT ID_ProjectTransform := PROJECT(ProjectTransform,
+ID_ProjectTransform := PROJECT(ProjectTransform,
                         TRANSFORM(
                             NewLayout,
-                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y%m%d');
+                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y%m%d'),
+                            SELF.TGA := STD.Str.Splitwords(LEFT.TGA, ',')[2];
                             SELF := LEFT;
-                            SELF.TGA := STD.Str.Splitwords(LEFT.TGA, ',')[2..];
                         ));
 
 ID_ProjectTransform;
