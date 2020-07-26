@@ -15,8 +15,8 @@ END;
 
 
 //OUTPUT(first);
-ProjectTransform := DATASET('~kavin::test::file::file.csv',Layout_ProjectTransform,THOR);
-
+ProjectTransform := DATASET('~kavin::test::file::file.csv',Layout_ProjectTransform,CSV(HEADING(1),SEPARATOR(','),QUOTE('"')));
+OUTPUT(ProjectTransform,NAMED('ProjectTransform'));
 
 
 NewLayout:= RECORD
@@ -34,13 +34,13 @@ END;
 ID_ProjectTransform := PROJECT(ProjectTransform,
                         TRANSFORM(
                             NewLayout,
-                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y%m%d'),
-                            SELF.TGA := IF(LEFT.TGA ='NaN', ' ',STD.Str.FindReplace(LEFT.TGA, 'NaN', ' ' ));
-                            SELF.TGE := IF(LEFT.TGE ='NaN', ' ',STD.Str.FindReplace(LEFT.TGE, 'NaN', ' ' ));
-                            SELF.NGA := IF(LEFT.NGA ='NaN', ' ',STD.Str.FindReplace(LEFT.NGA, 'NaN', ' ' ));
-                            SELF.NGE := IF(LEFT.NGE ='NaN', ' ',STD.Str.FindReplace(LEFT.NGE, 'NaN', ' ' ));
-                            SELF.HGA := IF(LEFT.HGA ='NaN', ' ',STD.Str.FindReplace(LEFT.HGA, 'NaN', ' ' ));
-                            SELF.HGE := IF(LEFT.HGE ='NaN', ' ',STD.Str.FindReplace(LEFT.HGE, 'NaN', ' ' ));
+                            SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y-%m-%d'),
+                            SELF.TGA := IF(LEFT.TGA ='NaN', ' ',STD.Str.FindReplace(LEFT.TGA, '0', ' ' ));
+                            SELF.TGE := IF(LEFT.TGE ='NaN', ' ',STD.Str.FindReplace(LEFT.TGE, '0', ' ' ));
+                            SELF.NGA := IF(LEFT.NGA ='NaN', ' ',STD.Str.FindReplace(LEFT.NGA, '0', ' ' ));
+                            SELF.NGE := IF(LEFT.NGE ='NaN', ' ',STD.Str.FindReplace(LEFT.NGE, '0', ' ' ));
+                            SELF.HGA := IF(LEFT.HGA ='NaN', ' ',STD.Str.FindReplace(LEFT.HGA, '0', ' ' ));
+                            SELF.HGE := IF(LEFT.HGE ='NaN', ' ',STD.Str.FindReplace(LEFT.HGE, '0', ' ' ));
 
                             //SELF.HGE := STD.Str.Splitwords(LEFT.HGE, ',')[2];
                             
