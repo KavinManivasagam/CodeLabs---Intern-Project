@@ -35,12 +35,18 @@ ID_ProjectTransform := PROJECT(ProjectTransform,
                         TRANSFORM(
                             NewLayout,
                             SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y%m%d'),
-                            SELF.TGA := STD.Str.Splitwords(LEFT.TGA, ',')[2];
-                            SELF.TGE := STD.Str.Splitwords(LEFT.TGE, ',')[2];
-                            SELF.NGA := STD.Str.Splitwords(LEFT.NGA, ',')[2];
-                            SELF.NGE := STD.Str.Splitwords(LEFT.NGE, ',')[2];
-                            SELF.HGA := STD.Str.Splitwords(LEFT.HGA, ',')[2];
-                            SELF.HGE := STD.Str.Splitwords(LEFT.HGE, ',')[2];
+                            SELF.TGA := IF(LEFT.TGA ='NaN', '',STD.Str.FindReplace(LEFT.TGA, 'NaN', ' ' ));
+                            SELF.TGE := IF(LEFT.TGE ='NaN', '',STD.Str.FindReplace(LEFT.TGE, 'NaN', ' ' ));
+                            SELF.NGA := IF(LEFT.NGA ='NaN', '',STD.Str.FindReplace(LEFT.NGA, 'NaN', ' ' ));
+                            SELF.NGE := IF(LEFT.NGE ='NaN', '',STD.Str.FindReplace(LEFT.NGE, 'NaN', ' ' ));
+                            SELF.HGA := IF(LEFT.HGA ='NaN', '',STD.Str.FindReplace(LEFT.HGA, 'NaN', ' ' ));
+                            SELF.HGE := IF(LEFT.HGE ='NaN', '',STD.Str.FindReplace(LEFT.HGE, 'NaN', ' ' ));
+
+                            //SELF.HGE := STD.Str.Splitwords(LEFT.HGE, ',')[2];
+                            
+                            
+
+
 
                             SELF := LEFT;
                         ));
