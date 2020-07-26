@@ -28,8 +28,8 @@ IMPORT STD;
     moveFiles(STRING name, STRING pfoldername) := NOTHOR(
                                                     STD.File.MoveExternalFile(
                                                     '192.168.56.101', 
-                                                    '192.168.56.101'+pfoldername+'/' + name,
-                                                    '192.168.56.101' + pfoldername+'/processed/' + name, 
+                                                    pfoldername+'/' + name,
+                                                    pfoldername+'/processed/' + name, 
                                                        
                                                     )
                                                 );
@@ -39,7 +39,7 @@ IMPORT STD;
             SEQUENTIAL(      
             STD.File.SprayDelimited(
             '192.168.56.101', 
-            '192.168.56.101' + pfoldername + '/' +name, 
+            pfoldername + '/' +name, 
             max_record_size,
             ',',
             '\n',
