@@ -33,12 +33,41 @@ END;
 //tried to make a transform function here to calculate a change from 2 fields but not really sure what I was doing with it */
 // transform is to just change you data and keep it clean like in your case your dare is a string you should convert it into UNSIGNED4 so that it occcupies less space and also helps you use arthimatic functions like between etc.
 dsClean := PROJECT(dsread, TRANSFORM(NewRec,
+                            
                             SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y-%m-%d');
-                            SELF.stockType := STD.Str.Splitwords(LEFT.file_name, '.')[1];//[11..]; // substring manipulation
+                            SELF.stockType := STD.Str.Splitwords(STD.Str.Splitwords(LEFT.file_name, '::')[3],'.')[1];//[11..]; // substring manipulation
                             SELF := LEFT;
                         ));
 
 dsClean;
+
+AnalyticsRec := RECORD
+    UNSIGNED4 date; 
+    UDECIMAL open;
+    UDECIMAL high;
+    UDECIMAL low;
+    UDECIMAL close;
+    UDECIMAL volume;
+    INTEGER Stock_DOW;
+    INTEGER Stock_month;
+    INTEGER Stock_year;
+    STRING15 stockType;
+    STRING200 file_name;
+END;
+
+//tried to make a transform function here to calculate a change from 2 fields but not really sure what I was doing with it */
+// transform is to just change you data and keep it clean like in your case your dare is a string you should convert it into UNSIGNED4 so that it occcupies less space and also helps you use arthimatic functions like between etc.
+dsStockCal := PROJECT(dsClean, TRANSFORM(AnalyticsRec,
+                            SELF.Stock_DOW   := Std.Date.DayOfWeek(LEFT.date);
+                            SELF.Stock_month := Std.Date.Month(LEFT.date) ;
+                            SELF.Stock_year  := Std.Date.Year(LEFT.date);
+
+                            SELF := LEFT;
+                        ));
+
+dsStockCal;
+
+
 
 
 //WT find the best performing day of each stock
