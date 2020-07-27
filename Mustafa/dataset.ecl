@@ -34,7 +34,7 @@ END;
 // transform is to just change you data and keep it clean like in your case your dare is a string you should convert it into UNSIGNED4 so that it occcupies less space and also helps you use arthimatic functions like between etc.
 dsClean := PROJECT(dsread, TRANSFORM(NewRec,
                             SELF.Date := STD.Date.FromStringToDate(LEFT.Date, '%Y-%m-%d');
-                            SELF.stockType := STD.Str.Splitwords(LEFT.file_name, '.')[1][11..]; // substring manipulation
+                            SELF.stockType := STD.Str.Splitwords(LEFT.file_name, '.')[1];//[11..]; // substring manipulation
                             SELF := LEFT;
                         ));
 
@@ -47,4 +47,11 @@ performingDays := TABLE(dsClean, {date,close,stockType});
 
 bestPerforming := performingDays(close = MAX(performingDays,close));
 
-OUTPUT(bestPerforming,NAMED('bestPerformingDays'))
+OUTPUT(bestPerforming,NAMED('bestPerformingDays'));
+
+//Get Volumne and Stock Of Stock By Stock type 
+
+getStockStatus := TABLE(dsClean,{INTEGER volumne := MAX(GROUP,dsClean.high),INTEGER Cnt := COUNT(GROUP)},stocktype);
+
+getStockStatus;
+ 
