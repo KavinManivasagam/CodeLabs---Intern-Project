@@ -52,3 +52,17 @@ ID_ProjectTransform := PROJECT(ProjectTransform,
                         ));
 
 ID_ProjectTransform;
+
+//Highest HGA
+getLargeHGAs := TABLE(ProjectTransform,{ HGA,DistinctColCnt := COUNT(GROUP) },HGA);
+
+HighestHGA :=getLargeHGAs(DistinctColCnt = MAX(getLargeHGAs,DistinctColCnt));
+
+OUTPUT(HighestHGA,NAMED('HighestHGA'));
+
+//Highest HGE
+getLargeHGEs := TABLE(ProjectTransform,{ HGE,DistinctColCnt := COUNT(GROUP) },HGE);
+
+HighestHGE :=getLargeHGEs(DistinctColCnt = MAX(getLargeHGEs,DistinctColCnt));
+
+OUTPUT(HighestHGE,NAMED('HighestHGE'));
