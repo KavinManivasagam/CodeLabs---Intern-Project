@@ -81,5 +81,7 @@ getGroupedData := TABLE(getDataCollected,
                               getDataCollected.Trans_month;
                               INTEGER Cnt := COUNT(GROUP);
                               INTEGER MaxThermal := MAX(GROUP,getDataCollected.TGA );
+                              INTEGER MaxNuclear := MAX(GROUP,getDataCollected.NGA);
+                              INTEGER MaxHydro := MAX(GROUP,getDataCollected.HGA);
                             },region,Trans_month);
 getGroupedData;
