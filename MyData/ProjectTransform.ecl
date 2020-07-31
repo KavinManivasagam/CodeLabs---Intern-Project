@@ -1,4 +1,5 @@
 IMPORT STD;
+IMPORT Visualizer;
 
 
 Layout_ProjectTransform := RECORD
@@ -63,6 +64,7 @@ AnalyticsRec:= RECORD
 END;
 
 
+
 getDataCollected := PROJECT(ID_ProjectTransform,
                         TRANSFORM(
                             AnalyticsRec,
@@ -81,5 +83,15 @@ getGroupedData := TABLE(getDataCollected,
                               getDataCollected.Trans_month;
                               INTEGER Cnt := COUNT(GROUP);
                               INTEGER MaxThermal := MAX(GROUP,getDataCollected.TGA );
+                              INTEGER MaxNuclear := MAX(GROUP,getDataCollected.NGA);
+                              INTEGER MaxHydro := MAX(GROUP,getDataCollected.HGA);
                             },region,Trans_month);
 getGroupedData;
+
+ds11 := DATASET([{'TGA', 'ACTUAL THERMAL GENERATION'},
+                {'NGA', 'ACTUAL NUCLEAR GENERATION'},
+                {'HGA', 'ACTUAL HYDRO GENERATION'}],{STRING5 Code, STRING Desc});
+
+
+OUTPUT(TABLE(getDataCollected, {Region, UNSIGNED Cnt := COUNT(GROUP)}, Region, FEW), NAMED('Region'));
+Visualizer.MultiD.Bar('myBarChart',, 'Region');
