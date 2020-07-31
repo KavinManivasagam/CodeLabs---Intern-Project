@@ -1,7 +1,6 @@
 IMPORT STD;
 IMPORT Visualizer;
 
-
 Layout_ProjectTransform := RECORD
     STRING15 Date;
     STRING15 Region;
@@ -18,7 +17,7 @@ END;
 //OUTPUT(first);
 ProjectTransform := DATASET('~kavin::test::file::file.csv',Layout_ProjectTransform,CSV(HEADING(1),SEPARATOR(','),QUOTE('"')));
 
-OUTPUT(ProjectTransform,NAMED('ProjectTransform'));
+OUTPUT(ProjectTransform,NAMED('dsRead'));
 
 NewLayout:= RECORD
     UNSIGNED4 Date;
@@ -47,7 +46,7 @@ ID_ProjectTransform := PROJECT(ProjectTransform,
                             SELF := LEFT;
                         ));
 
-ID_ProjectTransform;
+OUTPUT(ID_ProjectTransform,NAMED('dsClean'));
 
 AnalyticsRec:= RECORD
     UNSIGNED4 Date;
@@ -64,7 +63,6 @@ AnalyticsRec:= RECORD
 END;
 
 
-
 getDataCollected := PROJECT(ID_ProjectTransform,
                         TRANSFORM(
                             AnalyticsRec,
@@ -75,7 +73,9 @@ getDataCollected := PROJECT(ID_ProjectTransform,
                             SELF := LEFT;
                         ));
 
-getDataCollected;
+
+
+OUTPUT(getDataCollected,NAMED('dsEnrich'));
 
 getGroupedData := TABLE(getDataCollected,
                             {
@@ -86,12 +86,12 @@ getGroupedData := TABLE(getDataCollected,
                               INTEGER MaxNuclear := MAX(GROUP,getDataCollected.NGA);
                               INTEGER MaxHydro := MAX(GROUP,getDataCollected.HGA);
                             },region,Trans_month);
-getGroupedData;
 
-ds11 := DATASET([{'TGA', 'ACTUAL THERMAL GENERATION'},
-                {'NGA', 'ACTUAL NUCLEAR GENERATION'},
-                {'HGA', 'ACTUAL HYDRO GENERATION'}],{STRING5 Code, STRING Desc});
+OUTPUT(getGroupedData,NAMED('dsAnalyze'));
 
 
+
+
+//  Aggregate by Region ---
 OUTPUT(TABLE(getDataCollected, {Region, UNSIGNED Cnt := COUNT(GROUP)}, Region, FEW), NAMED('Region'));
 Visualizer.MultiD.Bar('myBarChart',, 'Region');
