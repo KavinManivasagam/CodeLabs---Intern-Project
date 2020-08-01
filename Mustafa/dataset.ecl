@@ -55,20 +55,29 @@ AnalyticsRec := RECORD
     STRING200 file_name;
 END;
 
+stockNameLookup :=   DATASET([ {'aadr','AdvisorShares Dorsey Wright'},
+                       {'aaxj','iShares MSCI'},
+                       {'acim','SPDR MSCI'},
+					   {'actx','Global X Guru Activist Index'},
+					   {'acwf','iShares Edge MSCI Multifactor Global'},
+                       {'acwi','iShares MSCI ACWI'},
+                       {'acwv','iShares Edge MSCI Min Vol Global'}
+				],{STRING15 Key,STRING15 Value});
+
+Dct := DICTIONARY(stockNameLookup,{KEY => stockNameLookup});
+
 //tried to make a transform function here to calculate a change from 2 fields but not really sure what I was doing with it */
 // transform is to just change you data and keep it clean like in your case your dare is a string you should convert it into UNSIGNED4 so that it occcupies less space and also helps you use arthimatic functions like between etc.
 dsStockCal := PROJECT(dsClean, TRANSFORM(AnalyticsRec,
                             SELF.Stock_DOW   := Std.Date.DayOfWeek(LEFT.date);
-                            SELF.Stock_month := Std.Date.Month(LEFT.date) ;
+                            SELF.Stock_month := Std.Date.Month(LEFT.date);
                             SELF.Stock_year  := Std.Date.Year(LEFT.date);
-
+                            SELF.stockType := IF(LEFT.stockType in Dct,
+                                            TRIM(Dct[LEFT.stockType].VALUE,LEFT,RIGHT),''),
                             SELF := LEFT;
                         ));
 
 dsStockCal;
-
-
-
 
 //WT find the best performing day of each stock
 //best performing defined as highest closing
@@ -80,7 +89,8 @@ OUTPUT(bestPerforming,NAMED('bestPerformingDays'));
 
 //Get Volumne and Stock Of Stock By Stock type 
 
-getStockStatus := TABLE(dsClean,{INTEGER volumne := MAX(GROUP,dsClean.high),INTEGER Cnt := COUNT(GROUP)},stocktype);
+getStockStatus := TABLE(dsStockCal,{dsStockCal.stocktype,dsStockCal.Stock_month,INTEGER highestStockValue := MAX(GROUP,dsStockCal.high),
+                INTEGER lowestStockValue := MIN(GROUP,dsStockCal.low),INTEGER Cnt := COUNT(GROUP)},stocktype,stock_month);
 
 getStockStatus;
  
