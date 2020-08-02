@@ -98,45 +98,41 @@ getGroupedData := TABLE(getDataCollected,
 OUTPUT(getGroupedData,NAMED('dsAnalyze'));
 
 
-
-
-
-
-
-
 //  Aggregate by Region ---
 OUTPUT(TABLE(getDataCollected, {Region, UNSIGNED Cnt := COUNT(GROUP)}, Region, FEW), NAMED('Region'));
 Visualizer.MultiD.Bar('myBarChart',, 'Region');
-dsSortPerDate := SORT(TABLE(getDataCollected,{date, RegionInt},date, RegionInt),date, RegionInt);
+
+dsSortPerDate := SORT(TABLE(getDataCollected,{RegionInt}, RegionInt), RegionInt);
 assignSequentialNumberPerDate := PROJECT(
                                     dsSortPerDate,
                                     TRANSFORM(
-                                        {UNSIGNED4 Num,unsigned4 date, INTEGER RegionInt},
+                                        {UNSIGNED4 Num, INTEGER RegionInt},
                                         SELF.Num := COUNTER,
                                         SELF := LEFT
                                         ));
 
 ML_Core.Types.NumericField XF(getDataCollected L, integer C) := TRANSFORM
    SELF.id := C;
-   SELF.number := assignSequentialNumberPerDate(date = L.date)[1].Num;
-   SELF.value :=  assignSequentialNumberPerDate(RegionInt = L.RegionInt)[1].Num;
-
+   SELF.number := assignSequentialNumberPerDate(RegionInt = L.RegionInt)[1].Num;
+   SELF.value :=  L.tga;
    SELF.wi:=1;
 END;
 getSequentialNumberForAll := PROJECT(getDataCollected,XF(LEFT,COUNTER));
 
 simpleAggregations := ML_Core.FieldAggregates(getSequentialNumberForAll).Simple;
 
+OUTPUT(simpleAggregations,NAMED('simpleAggregations'));
+
 OutputRec := RECORD
     RECORDOF(simpleAggregations);
-    unsigned4 date;
+    INTEGER RegionInt;
 END;
 AggregateRes := JOIN(simpleAggregations,
                     assignSequentialNumberPerDate,
                     LEFT.number = RIGHT.num,
                     TRANSFORM(
                         RECORDOF(OutputRec),
-                        SELF.date := RIGHT.date,
+                        SELF.RegionInt := RIGHT.RegionInt,
                         SELF:=LEFT
                     ),INNER);
 
