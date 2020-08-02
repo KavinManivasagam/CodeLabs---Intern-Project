@@ -61,6 +61,7 @@ AnalyticsRec:= RECORD
     INTEGER  Trans_DOW;
     INTEGER  Trans_month;
     INTEGER  Trans_Year;
+    INTEGER RegionInt;
 END;
 
 
@@ -71,6 +72,12 @@ getDataCollected := PROJECT(ID_ProjectTransform,
                             SELF.Trans_month := Std.Date.Month(LEFT.date) ;
                             SELF.Trans_Year  := Std.Date.Year(LEFT.date);
                             SELF.TGA := (INTEGER) Left.TGA;
+                            SELF.RegionInt := CASE((LEFT.Region), 'Western'=> 1, 
+                                                                'Southern' => 2, 
+                                                                'Eastern'=> 3, 
+                                                                'Northern' => 4, 
+                                                                'NorthEastern' => 5,
+                                                                0),
                             SELF := LEFT;
                         ));
 
@@ -93,14 +100,18 @@ OUTPUT(getGroupedData,NAMED('dsAnalyze'));
 
 
 
+
+
+
+
 //  Aggregate by Region ---
 OUTPUT(TABLE(getDataCollected, {Region, UNSIGNED Cnt := COUNT(GROUP)}, Region, FEW), NAMED('Region'));
 Visualizer.MultiD.Bar('myBarChart',, 'Region');
-dsSortPerDate := SORT(TABLE(getDataCollected,{date, region},date, region),date, region);
+dsSortPerDate := SORT(TABLE(getDataCollected,{date, RegionInt},date, RegionInt),date, RegionInt);
 assignSequentialNumberPerDate := PROJECT(
                                     dsSortPerDate,
                                     TRANSFORM(
-                                        {UNSIGNED4 Num,unsigned4 date, INTEGER region},
+                                        {UNSIGNED4 Num,unsigned4 date, INTEGER RegionInt},
                                         SELF.Num := COUNTER,
                                         SELF := LEFT
                                         ));
@@ -108,7 +119,7 @@ assignSequentialNumberPerDate := PROJECT(
 ML_Core.Types.NumericField XF(getDataCollected L, integer C) := TRANSFORM
    SELF.id := C;
    SELF.number := assignSequentialNumberPerDate(date = L.date)[1].Num;
-   SELF.value :=  assignSequentialNumberPerDate(region = L.region)[1].Num;
+   SELF.value :=  assignSequentialNumberPerDate(RegionInt = L.RegionInt)[1].Num;
 
    SELF.wi:=1;
 END;
