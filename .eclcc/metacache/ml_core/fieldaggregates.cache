@@ -1,0 +1,7 @@
+<Cache hash="-1066457302868303457">
+<Attr module="ML_Core" name="fieldaggregates">
+ <Depend module="ML_Core" name="types"/>
+ <Depend module="std.system" name="thorlib"/>
+ <Depend module="ML_Core.Utils" name="sequenceinfield"/>
+</Attr>
+</Cache>

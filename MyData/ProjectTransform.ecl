@@ -1,6 +1,6 @@
 IMPORT STD;
 IMPORT Visualizer;
-
+IMPORT ML_Core;
 
 Layout_ProjectTransform := RECORD
     STRING15 Date;
@@ -18,7 +18,7 @@ END;
 //OUTPUT(first);
 ProjectTransform := DATASET('~kavin::test::file::file.csv',Layout_ProjectTransform,CSV(HEADING(1),SEPARATOR(','),QUOTE('"')));
 
-OUTPUT(ProjectTransform,NAMED('ProjectTransform'));
+OUTPUT(ProjectTransform,NAMED('dsRead'));
 
 NewLayout:= RECORD
     UNSIGNED4 Date;
@@ -47,12 +47,12 @@ ID_ProjectTransform := PROJECT(ProjectTransform,
                             SELF := LEFT;
                         ));
 
-ID_ProjectTransform;
+OUTPUT(ID_ProjectTransform,NAMED('dsClean'));
 
 AnalyticsRec:= RECORD
     UNSIGNED4 Date;
     STRING15 Region;
-    STRING15 TGA; //ACTUAL THERMAL GENERATION
+    INTEGER TGA; //ACTUAL THERMAL GENERATION
     STRING15 TGE;
     STRING15 NGA; //ACTUAL NUCLEAR GENERATION
     STRING15 NGE;
@@ -64,18 +64,19 @@ AnalyticsRec:= RECORD
 END;
 
 
-
 getDataCollected := PROJECT(ID_ProjectTransform,
                         TRANSFORM(
                             AnalyticsRec,
                             SELF.Trans_DOW   := Std.Date.DayOfWeek(LEFT.date);
                             SELF.Trans_month := Std.Date.Month(LEFT.date) ;
                             SELF.Trans_Year  := Std.Date.Year(LEFT.date);
-
+                            SELF.TGA := (INTEGER) Left.TGA;
                             SELF := LEFT;
                         ));
 
-getDataCollected;
+
+
+OUTPUT(getDataCollected,NAMED('dsEnrich'));
 
 getGroupedData := TABLE(getDataCollected,
                             {
@@ -86,12 +87,47 @@ getGroupedData := TABLE(getDataCollected,
                               INTEGER MaxNuclear := MAX(GROUP,getDataCollected.NGA);
                               INTEGER MaxHydro := MAX(GROUP,getDataCollected.HGA);
                             },region,Trans_month);
-getGroupedData;
 
-ds11 := DATASET([{'TGA', 'ACTUAL THERMAL GENERATION'},
-                {'NGA', 'ACTUAL NUCLEAR GENERATION'},
-                {'HGA', 'ACTUAL HYDRO GENERATION'}],{STRING5 Code, STRING Desc});
+OUTPUT(getGroupedData,NAMED('dsAnalyze'));
 
 
+
+
+//  Aggregate by Region ---
 OUTPUT(TABLE(getDataCollected, {Region, UNSIGNED Cnt := COUNT(GROUP)}, Region, FEW), NAMED('Region'));
 Visualizer.MultiD.Bar('myBarChart',, 'Region');
+dsSortPerDate := SORT(TABLE(getDataCollected,{date, region},date, region),date, region);
+assignSequentialNumberPerDate := PROJECT(
+                                    dsSortPerDate,
+                                    TRANSFORM(
+                                        {UNSIGNED4 Num,unsigned4 date, INTEGER region},
+                                        SELF.Num := COUNTER,
+                                        SELF := LEFT
+                                        ));
+
+ML_Core.Types.NumericField XF(getDataCollected L, integer C) := TRANSFORM
+   SELF.id := C;
+   SELF.number := assignSequentialNumberPerDate(date = L.date)[1].Num;
+   SELF.value :=  assignSequentialNumberPerDate(region = L.region)[1].Num;
+
+   SELF.wi:=1;
+END;
+getSequentialNumberForAll := PROJECT(getDataCollected,XF(LEFT,COUNTER));
+
+simpleAggregations := ML_Core.FieldAggregates(getSequentialNumberForAll).Simple;
+
+OutputRec := RECORD
+    RECORDOF(simpleAggregations);
+    unsigned4 date;
+END;
+AggregateRes := JOIN(simpleAggregations,
+                    assignSequentialNumberPerDate,
+                    LEFT.number = RIGHT.num,
+                    TRANSFORM(
+                        RECORDOF(OutputRec),
+                        SELF.date := RIGHT.date,
+                        SELF:=LEFT
+                    ),INNER);
+
+/**View the Result in the work unit**/
+OUTPUT(AggregateRes,NAMED('AggregateRes'));
